@@ -1,20 +1,68 @@
-Periodic Table [![Build Status](https://travis-ci.org/Frozen-Developers/android-periodic-table.svg)](https://travis-ci.org/Frozen-Developers/android-periodic-table)
+Periodic Table
 ==============
 
-An ad-free, open source, holo styled interactive periodic table with list of element properties and list of isotopes based on Wikipedia's database.
+An ad-free, open source, interactive periodic table for Android with a list of
+element properties and a list of isotopes, based on Wikipedia's database.
+
+This is a modernized fork of the original
+[Frozen-Developers](https://github.com/Frozen-Developers/android-periodic-table)
+app. The build and the source have been migrated to AndroidX and current
+tooling so it builds and runs on recent Android versions (verified on Android 10
+and Android 16); the app's features are unchanged.
+
+Building
+--------
+
+Requirements:
+
+- JDK 17 or newer (builds on up to JDK 26)
+- Android SDK with platform `android-35` installed
+- A `local.properties` at the repo root pointing at the SDK, e.g.
+  `sdk.dir=/path/to/Android/Sdk`
+
+Build a debug APK:
+
+    ./gradlew assembleDebug
+
+Build a signed release APK (see Signing below):
+
+    ./gradlew assembleRelease
+
+The output APKs are written under `PeriodicTable/build/outputs/apk/`.
+
+Toolchain: Android Gradle Plugin 9.4.1, Gradle 9.8.2 (via the wrapper),
+`compileSdk 35`, `minSdk 24`, `targetSdk 34`.
+
+Signing
+-------
+
+Release signing is configured from a `keystore.properties` file at the repo
+root, which is intentionally gitignored. Create it alongside your keystore:
+
+    storeFile=release.keystore
+    storePassword=...
+    keyAlias=...
+    keyPassword=...
+
+When `keystore.properties` is absent (e.g. a fresh checkout), the release build
+is produced unsigned instead of failing.
 
 build_db.py
 -----------
 
-You can rebuild the database anytime you want using build_db.py script. The script depends on python 3 and on the internet connection.
+You can rebuild the element database at any time with `build_db.py`. The script
+requires Python 3 and an internet connection; run it from the repo root. It
+scrapes Wikipedia and overwrites
+`PeriodicTable/src/main/res/raw/database.json`.
 
 database.json
 -------------
 
-This file uses material from the Wikipedia article "Periodic table", which is released under the Creative Commons Attribution-Share-Alike License 3.0.
+This file uses material from the Wikipedia article "Periodic table", which is
+released under the Creative Commons Attribution-Share-Alike License 3.0.
 
 Download
 --------
 
-[<img src="https://play.google.com/intl/en_us/badges/images/apps/en-play-badge.png" alt="Google Play Store" height="60px">](https://play.google.com/store/apps/details?id=com.frozendevs.periodictable)
-[![F-Droid](https://guardianproject.info/wp-content/uploads/2014/07/logo-fdroid.png)](https://f-droid.org/repository/browse/?fdid=com.frozendevs.periodictable)
+Prebuilt APKs are published on the
+[Releases](https://github.com/Elwimen/android-periodic-table/releases) page.
