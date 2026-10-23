@@ -8,6 +8,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.frozendevs.periodictable.R;
 import com.frozendevs.periodictable.model.Isotope;
 import com.frozendevs.periodictable.view.ExpandableIndicatorView;
@@ -69,19 +72,40 @@ public class IsotopesAdapter extends AbstractExpandableItemAdapter<IsotopesAdapt
 
     private class IsotopeProperties {
 
-        Property symbol, halfLife, spin, abundance, decayModes;
+        Property symbol, halfLife, abundance;
+        private final List<Property> children = new ArrayList<>();
 
         public IsotopeProperties(Context context, Isotope isotope) {
             symbol = new Property(context, isotope.getSymbol());
             halfLife = new Property(context, R.string.property_half_life, isotope.getHalfLife(),
                     R.string.property_value_unknown, R.string.property_value_stable);
-            spin = new Property(context, R.string.property_spin, isotope.getSpin(),
-                    R.string.property_value_unknown);
             abundance = new Property(context, R.string.property_abundance, isotope.getAbundance(),
                     R.string.property_value_none, R.string.property_value_trace);
-            decayModes = new Property(context,
+            Property spin = new Property(context, R.string.property_spin, isotope.getSpin(),
+                    R.string.property_value_unknown);
+            Property decayModes = new Property(context,
                     R.string.property_decay_modes, isotope.getHalfLife().equals("-") ?
                     context.getString(R.string.property_value_none) : isotope.getDecayModes());
+
+            // The original four rows are always shown (half-life, decay modes,
+            // spin, abundance). The IAEA-sourced rows below are added only when
+            // present, so isomers and unmeasured nuclides don't show empty rows.
+            children.add(halfLife);
+            children.add(decayModes);
+            children.add(spin);
+            children.add(abundance);
+            addIfPresent(context, R.string.property_atomic_mass, isotope.getAtomicMass());
+            addIfPresent(context, R.string.property_mass_excess, isotope.getMassExcess());
+            addIfPresent(context, R.string.property_binding_energy, isotope.getBindingEnergy());
+            addIfPresent(context, R.string.property_decay_energy, isotope.getDecayEnergy());
+            addIfPresent(context, R.string.property_magnetic_moment, isotope.getMagneticMoment());
+            addIfPresent(context, R.string.property_discovery, isotope.getDiscovery());
+        }
+
+        private void addIfPresent(Context context, int name, String value) {
+            if (value != null && !value.equals("")) {
+                children.add(new Property(context, name, value));
+            }
         }
 
         public Property getSymbol() {
@@ -92,16 +116,12 @@ public class IsotopesAdapter extends AbstractExpandableItemAdapter<IsotopesAdapt
             return halfLife;
         }
 
-        public Property getSpin() {
-            return spin;
-        }
-
         public Property getAbundance() {
             return abundance;
         }
 
-        public Property getDecayModes() {
-            return decayModes;
+        public List<Property> getChildren() {
+            return children;
         }
     }
 
@@ -212,7 +232,7 @@ public class IsotopesAdapter extends AbstractExpandableItemAdapter<IsotopesAdapt
 
     @Override
     public int getChildCount(int groupPosition) {
-        return 4;
+        return mProperties[groupPosition].getChildren().size();
     }
 
     @Override
@@ -298,17 +318,6 @@ public class IsotopesAdapter extends AbstractExpandableItemAdapter<IsotopesAdapt
     }
 
     private Property getChild(int groupPosition, int childPosition) {
-        IsotopeProperties properties = mProperties[groupPosition];
-
-        switch (childPosition) {
-            case 0:
-                return properties.getHalfLife();
-            case 1:
-                return properties.getDecayModes();
-            case 2:
-                return properties.getSpin();
-            default:
-                return properties.getAbundance();
-        }
+        return mProperties[groupPosition].getChildren().get(childPosition);
     }
 }

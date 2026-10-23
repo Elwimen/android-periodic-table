@@ -92,6 +92,12 @@
     <string name="property_decay_modes">Decay modes</string>
     <string name="property_spin">Spin</string>
     <string name="property_abundance">Natural abundance</string>
+    <string name="property_atomic_mass">Atomic mass</string>
+    <string name="property_mass_excess">Mass excess</string>
+    <string name="property_binding_energy">Binding energy/nucleon</string>
+    <string name="property_decay_energy">Decay energy</string>
+    <string name="property_magnetic_moment">Magnetic moment</string>
+    <string name="property_discovery">Discovered</string>
 
     <!-- Translatable values -->
     <string name="property_value_unknown">Unknown</string>

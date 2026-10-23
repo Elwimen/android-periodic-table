@@ -6,6 +6,7 @@ import android.os.Parcelable;
 public class Isotope implements Parcelable {
 
     private String symbol, halfLife, spin, abundance, decayModes;
+    private String atomicMass, massExcess, bindingEnergy, decayEnergy, magneticMoment, discovery;
 
     public static final Parcelable.Creator<Isotope> CREATOR
             = new Parcelable.Creator<Isotope>() {
@@ -24,6 +25,12 @@ public class Isotope implements Parcelable {
         spin = in.readString();
         abundance = in.readString();
         decayModes = in.readString();
+        atomicMass = in.readString();
+        massExcess = in.readString();
+        bindingEnergy = in.readString();
+        decayEnergy = in.readString();
+        magneticMoment = in.readString();
+        discovery = in.readString();
     }
 
     @Override
@@ -38,6 +45,12 @@ public class Isotope implements Parcelable {
         dest.writeString(spin);
         dest.writeString(abundance);
         dest.writeString(decayModes);
+        dest.writeString(atomicMass);
+        dest.writeString(massExcess);
+        dest.writeString(bindingEnergy);
+        dest.writeString(decayEnergy);
+        dest.writeString(magneticMoment);
+        dest.writeString(discovery);
     }
 
     public String getSymbol() {
@@ -58,5 +71,29 @@ public class Isotope implements Parcelable {
 
     public String getDecayModes() {
         return decayModes;
+    }
+
+    public String getAtomicMass() {
+        return atomicMass;
+    }
+
+    public String getMassExcess() {
+        return massExcess;
+    }
+
+    public String getBindingEnergy() {
+        return bindingEnergy;
+    }
+
+    public String getDecayEnergy() {
+        return decayEnergy;
+    }
+
+    public String getMagneticMoment() {
+        return magneticMoment;
+    }
+
+    public String getDiscovery() {
+        return discovery;
     }
 }
