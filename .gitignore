@@ -4,3 +4,7 @@ local.properties
 .DS_Store
 *.iml
 build/
+
+# Release signing (keep these backed up, never commit)
+release.keystore
+keystore.properties

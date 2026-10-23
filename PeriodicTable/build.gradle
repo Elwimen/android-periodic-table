@@ -2,6 +2,16 @@ plugins {
     id 'com.android.application' version '9.4.1'
 }
 
+// Release signing is driven by a gitignored keystore.properties at the repo
+// root. When it is absent (e.g. a clean checkout) the release build is simply
+// left unsigned instead of failing.
+def keystorePropertiesFile = rootProject.file("keystore.properties")
+def keystoreProperties = new Properties()
+def hasKeystore = keystorePropertiesFile.exists()
+if (hasKeystore) {
+    keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+}
+
 android {
     namespace 'com.frozendevs.periodictable'
     compileSdk 35
@@ -21,11 +31,27 @@ android {
         targetCompatibility JavaVersion.VERSION_17
     }
 
+    signingConfigs {
+        release {
+            if (hasKeystore) {
+                storeFile rootProject.file(keystoreProperties['storeFile'])
+                storePassword keystoreProperties['storePassword']
+                keyAlias keystoreProperties['keyAlias']
+                keyPassword keystoreProperties['keyPassword']
+            }
+        }
+    }
+
     buildTypes {
         release {
-            minifyEnabled true
-            shrinkResources true
+            // Keep R8 / resource shrinking off: the app parses its database via
+            // Gson reflection, so shrinking risks stripping model fields.
+            minifyEnabled false
+            shrinkResources false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            if (hasKeystore) {
+                signingConfig signingConfigs.release
+            }
         }
     }
 
@@ -47,9 +73,4 @@ dependencies {
     implementation 'com.google.code.gson:gson:2.11.0'
     implementation 'com.h6ah4i.android.widget.advrecyclerview:advrecyclerview:1.0.0'
     implementation 'com.squareup.picasso:picasso:2.8'
-}
-
-if (project.hasProperty("PeriodicTable.signing") &&
-        file(project.property("PeriodicTable.signing") + ".gradle").exists()) {
-    apply from: project.property("PeriodicTable.signing") + ".gradle";
 }
