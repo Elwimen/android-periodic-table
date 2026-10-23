@@ -12,6 +12,25 @@ if (hasKeystore) {
     keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
 }
 
+// Build-time version name: <UTC build date>-<git short hash>, with a "-dirty"
+// marker when the working tree has uncommitted changes, so the hash always
+// matches what was actually built. Falls back to the date alone outside git.
+def cmdOut = { List<String> args ->
+    try {
+        def out = providers.exec {
+            commandLine args
+            ignoreExitValue = true
+        }.standardOutput.asText.get().trim()
+        return out
+    } catch (Exception ignored) {
+        return ""
+    }
+}
+def gitHash = cmdOut(["git", "rev-parse", "--short", "HEAD"])
+def gitDirty = cmdOut(["git", "status", "--porcelain"]).isEmpty() ? "" : "-dirty"
+def buildDate = new Date().format("yyyyMMdd", TimeZone.getTimeZone("UTC"))
+def dynVersionName = gitHash.isEmpty() ? buildDate : "${buildDate}-${gitHash}${gitDirty}"
+
 android {
     namespace 'com.frozendevs.periodictable'
     compileSdk 35
@@ -21,7 +40,7 @@ android {
         minSdkVersion 24
         targetSdkVersion 34
         versionCode 3
-        versionName "1.1"
+        versionName dynVersionName
 
         vectorDrawables.useSupportLibrary = true
     }
