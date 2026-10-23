@@ -9,7 +9,7 @@ import android.graphics.Paint;
 import android.os.AsyncTask;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.support.v4.util.LruCache;
+import androidx.collection.LruCache;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.SoundEffectConstants;
@@ -128,8 +128,6 @@ public class PeriodicTableView extends ZoomableScrollView {
         }
 
         private Bitmap generateBitmap(View view) {
-            Bitmap bitmap = null;
-
             ViewGroup.LayoutParams layoutParams = view.getLayoutParams();
 
             mTileSize = Math.max(mTileSize, Math.max(layoutParams.width,
@@ -140,15 +138,15 @@ public class PeriodicTableView extends ZoomableScrollView {
                     layoutParams.height, View.MeasureSpec.EXACTLY));
             view.layout(0, 0, view.getMeasuredWidth(), view.getMeasuredHeight());
 
-            view.buildDrawingCache();
-
-            final Bitmap drawingCache = view.getDrawingCache();
-
-            if (drawingCache != null) {
-                bitmap = Bitmap.createBitmap(drawingCache);
+            if (view.getMeasuredWidth() <= 0 || view.getMeasuredHeight() <= 0) {
+                return null;
             }
 
-            view.destroyDrawingCache();
+            // The View drawing cache was deprecated and is a no-op on modern Android,
+            // so render the tile straight onto a software Canvas instead.
+            Bitmap bitmap = Bitmap.createBitmap(view.getMeasuredWidth(),
+                    view.getMeasuredHeight(), Bitmap.Config.ARGB_8888);
+            view.draw(new Canvas(bitmap));
 
             return bitmap;
         }
@@ -287,9 +285,17 @@ public class PeriodicTableView extends ZoomableScrollView {
 
     @Override
     public float getMinimalZoom() {
+        if (mAdapter == null || mTileSize <= 0) {
+            return 0f;
+        }
+
         final int groups = mAdapter.getGroupsCount();
         final int periods = mAdapter.getPeriodsCount();
         final int tileSize = mTileSize;
+
+        if (groups <= 0 || periods <= 0) {
+            return 0f;
+        }
 
         return Math.min((getWidth() - ((groups - 1) * DEFAULT_SPACING)) / groups,
                 (getHeight() - ((periods - 1) * DEFAULT_SPACING)) / periods) / tileSize;
@@ -488,6 +494,9 @@ public class PeriodicTableView extends ZoomableScrollView {
             }
         }
 
+        // The tile size is now known, so force a layout pass to recompute the zoom
+        // (and, via onLayout, rescale the active view) before drawing.
+        requestLayout();
         invalidate();
 
         updateEmptyStatus(false);

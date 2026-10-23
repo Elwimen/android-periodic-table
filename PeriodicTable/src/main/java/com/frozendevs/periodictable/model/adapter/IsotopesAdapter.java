@@ -217,12 +217,14 @@ public class IsotopesAdapter extends AbstractExpandableItemAdapter<IsotopesAdapt
 
     @Override
     public long getGroupId(int groupPosition) {
-        return mProperties[groupPosition].hashCode();
+        // advrecyclerview packs group/child ids into a limited bit range, so a full
+        // 32-bit hashCode overflows it. Positions are stable (data never reorders).
+        return groupPosition;
     }
 
     @Override
     public long getChildId(int groupPosition, int childPosition) {
-        return getChild(groupPosition, childPosition).hashCode();
+        return childPosition;
     }
 
     @Override

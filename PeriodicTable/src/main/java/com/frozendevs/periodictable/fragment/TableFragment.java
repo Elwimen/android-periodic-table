@@ -4,13 +4,13 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.ActivityOptionsCompat;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.LoaderManager;
-import android.support.v4.content.Loader;
-import android.support.v4.util.LruCache;
+import androidx.annotation.Nullable;
+import androidx.core.app.ActivityCompat;
+import androidx.core.app.ActivityOptionsCompat;
+import androidx.fragment.app.Fragment;
+import androidx.loader.app.LoaderManager;
+import androidx.loader.content.Loader;
+import androidx.collection.LruCache;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -35,7 +35,7 @@ public class TableFragment extends Fragment implements PeriodicTableView.OnItemC
     private PeriodicTableView mPeriodicTableView;
     private LruCache<Integer, Bitmap> mBitmapCache = new LruCache<>(1);
 
-    private class SharedElementCallback extends android.support.v4.app.SharedElementCallback {
+    private class SharedElementCallback extends androidx.core.app.SharedElementCallback {
         @Override
         public void onSharedElementStart(List<String> sharedElementNames, List<View> sharedElements,
                                          List<View> sharedElementSnapshots) {

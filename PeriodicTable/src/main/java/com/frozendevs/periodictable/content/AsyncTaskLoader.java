@@ -3,7 +3,7 @@ package com.frozendevs.periodictable.content;
 import android.content.Context;
 
 public abstract class AsyncTaskLoader<Result> extends
-        android.support.v4.content.AsyncTaskLoader<Result> {
+        androidx.loader.content.AsyncTaskLoader<Result> {
     private Result mResult;
 
     public AsyncTaskLoader(Context context) {
