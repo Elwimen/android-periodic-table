@@ -1,7 +1,7 @@
 package com.frozendevs.periodictable;
 
 import android.app.Application;
-import android.support.v4.app.SharedElementCallback;
+import androidx.core.app.SharedElementCallback;
 import android.view.View;
 
 public class PeriodicTableApplication extends Application {

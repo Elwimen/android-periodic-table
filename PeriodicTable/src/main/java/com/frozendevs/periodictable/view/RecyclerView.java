@@ -5,7 +5,7 @@ import android.util.AttributeSet;
 import android.view.ContextMenu;
 import android.view.View;
 
-public class RecyclerView extends android.support.v7.widget.RecyclerView {
+public class RecyclerView extends androidx.recyclerview.widget.RecyclerView {
     private View mEmptyView;
     private RecyclerContextMenuInfo mContextMenuInfo;
 
@@ -21,8 +21,8 @@ public class RecyclerView extends android.support.v7.widget.RecyclerView {
         }
     }
 
-    private final android.support.v7.widget.RecyclerView.AdapterDataObserver observer =
-            new android.support.v7.widget.RecyclerView.AdapterDataObserver() {
+    private final androidx.recyclerview.widget.RecyclerView.AdapterDataObserver observer =
+            new androidx.recyclerview.widget.RecyclerView.AdapterDataObserver() {
                 @Override
                 public void onChanged() {
                     checkIfEmpty();
@@ -62,7 +62,7 @@ public class RecyclerView extends android.support.v7.widget.RecyclerView {
     }
 
     @Override
-    public void setAdapter(android.support.v7.widget.RecyclerView.Adapter adapter) {
+    public void setAdapter(androidx.recyclerview.widget.RecyclerView.Adapter adapter) {
         final RecyclerView.Adapter oldAdapter = getAdapter();
 
         if (oldAdapter != null) {

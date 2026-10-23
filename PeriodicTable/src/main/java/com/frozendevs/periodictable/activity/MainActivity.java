@@ -2,10 +2,10 @@ package com.frozendevs.periodictable.activity;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.design.widget.TabLayout;
-import android.support.v4.view.ViewPager;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
+import com.google.android.material.tabs.TabLayout;
+import androidx.viewpager.widget.ViewPager;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 
@@ -48,10 +48,9 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.action_about:
-                startActivity(new Intent(this, SettingsActivity.class));
-                return true;
+        if (item.getItemId() == R.id.action_about) {
+            startActivity(new Intent(this, SettingsActivity.class));
+            return true;
         }
 
         return super.onOptionsItemSelected(item);

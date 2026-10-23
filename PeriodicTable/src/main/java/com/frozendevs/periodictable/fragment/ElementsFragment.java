@@ -1,13 +1,13 @@
 package com.frozendevs.periodictable.fragment;
 
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.LoaderManager;
-import android.support.v4.content.Loader;
-import android.support.v4.view.MenuItemCompat;
-import android.support.v4.view.ViewCompat;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.SearchView;
+import androidx.fragment.app.Fragment;
+import androidx.loader.app.LoaderManager;
+import androidx.loader.content.Loader;
+import androidx.core.view.MenuItemCompat;
+import androidx.core.view.ViewCompat;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.appcompat.widget.SearchView;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;

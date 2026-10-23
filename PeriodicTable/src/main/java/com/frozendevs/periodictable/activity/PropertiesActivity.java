@@ -12,12 +12,12 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.support.design.widget.CollapsingToolbarLayout;
-import android.support.design.widget.TabLayout;
-import android.support.v4.app.SharedElementCallback;
-import android.support.v4.view.ViewPager;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
+import com.google.android.material.appbar.CollapsingToolbarLayout;
+import com.google.android.material.tabs.TabLayout;
+import androidx.core.app.SharedElementCallback;
+import androidx.viewpager.widget.ViewPager;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -88,10 +88,9 @@ public class PropertiesActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-
-        CollapsingToolbarLayout collapsingToolbar = (CollapsingToolbarLayout) findViewById(
-                R.id.collapsing_toolbar);
-        collapsingToolbar.setTitle(mElementProperties.getName());
+        // The element name is already shown inside the tile, so keep the collapsing
+        // toolbar title hidden (it otherwise draws large text over the tile).
+        getSupportActionBar().setDisplayShowTitleEnabled(false);
 
         Bundle bundle = new Bundle();
         bundle.putParcelable(ARGUMENT_PROPERTIES, mElementProperties);
@@ -134,39 +133,6 @@ public class PropertiesActivity extends AppCompatActivity {
                 mElementProperties.getOxidationStates()));
         oxidationStates.setTypeface(typeface);
 
-        String imageUrl = mElementProperties.getImageUrl();
-
-        final ImageView backdrop = (ImageView) findViewById(R.id.backdrop);
-
-        if (imageUrl.equals("")) {
-            backdrop.setImageResource(R.drawable.backdrop);
-        } else {
-            final ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(
-                    Context.CONNECTIVITY_SERVICE);
-            final NetworkInfo networkInfo = connectivityManager.getNetworkInfo(
-                    ConnectivityManager.TYPE_MOBILE);
-
-            SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
-
-            String downloadWifiOnlyKey = getString(R.string.preferences_download_wifi_only_key);
-
-            RequestCreator requestCreator = Picasso.with(this).load(imageUrl);
-            if (networkInfo != null && (networkInfo.getState() == NetworkInfo.State.CONNECTED ||
-                    networkInfo.getState() == NetworkInfo.State.CONNECTING) &&
-                    preferences.getBoolean(downloadWifiOnlyKey, false)) {
-                requestCreator.networkPolicy(NetworkPolicy.OFFLINE);
-            }
-            requestCreator.into(backdrop, new Callback() {
-                @Override
-                public void onSuccess() {
-                }
-
-                @Override
-                public void onError() {
-                    backdrop.setImageResource(R.drawable.backdrop);
-                }
-            });
-        }
     }
 
     @Override
@@ -178,15 +144,14 @@ public class PropertiesActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.action_wiki:
-                startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(
-                        mElementProperties.getWikipediaLink())));
-                return true;
-
-            case android.R.id.home:
-                supportFinishAfterTransition();
-                return true;
+        int itemId = item.getItemId();
+        if (itemId == R.id.action_wiki) {
+            startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(
+                    mElementProperties.getWikipediaLink())));
+            return true;
+        } else if (itemId == android.R.id.home) {
+            supportFinishAfterTransition();
+            return true;
         }
 
         return super.onOptionsItemSelected(item);
@@ -217,11 +182,10 @@ public class PropertiesActivity extends AppCompatActivity {
             propertyValue = (String) ((TextView) view.findViewById(R.id.property_value)).getText();
         }
 
-        switch (item.getItemId()) {
-            case R.id.context_copy:
-                ((ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE)).
-                        setPrimaryClip(ClipData.newPlainText(propertyName, propertyValue));
-                return true;
+        if (item.getItemId() == R.id.context_copy) {
+            ((ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE)).
+                    setPrimaryClip(ClipData.newPlainText(propertyName, propertyValue));
+            return true;
         }
 
         return super.onContextItemSelected(item);
