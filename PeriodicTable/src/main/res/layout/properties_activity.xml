@@ -25,10 +25,18 @@
             app:layout_scrollFlags="scroll|enterAlways|enterAlwaysCollapsed"
             app:toolbarId="@id/toolbar">
 
+            <ImageView
+                android:id="@+id/backdrop"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/backdrop_height"
+                android:contentDescription="@null"
+                android:scaleType="centerCrop"
+                app:layout_collapseMode="parallax" />
+
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="?attr/actionBarSize"
+                android:layout_marginTop="@dimen/backdrop_height"
                 android:background="@color/primary"
                 android:baselineAligned="false"
                 android:orientation="horizontal"

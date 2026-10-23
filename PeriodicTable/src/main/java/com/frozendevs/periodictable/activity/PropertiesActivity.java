@@ -4,14 +4,10 @@ import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.graphics.Typeface;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import com.google.android.material.appbar.CollapsingToolbarLayout;
 import com.google.android.material.tabs.TabLayout;
 import androidx.core.app.SharedElementCallback;
@@ -36,10 +32,9 @@ import com.frozendevs.periodictable.model.adapter.PropertiesAdapter;
 import com.frozendevs.periodictable.model.adapter.TableAdapter;
 import com.frozendevs.periodictable.model.adapter.ViewPagerAdapter;
 import com.frozendevs.periodictable.view.RecyclerView;
-import com.squareup.picasso.Callback;
-import com.squareup.picasso.NetworkPolicy;
 import com.squareup.picasso.Picasso;
-import com.squareup.picasso.RequestCreator;
+
+import java.io.IOException;
 
 public class PropertiesActivity extends AppCompatActivity {
 
@@ -133,6 +128,24 @@ public class PropertiesActivity extends AppCompatActivity {
                 mElementProperties.getOxidationStates()));
         oxidationStates.setTypeface(typeface);
 
+        // Element photos are bundled under assets/elements/<atomic number>.webp;
+        // elements without one fall back to the generic backdrop. No network.
+        ImageView backdrop = (ImageView) findViewById(R.id.backdrop);
+        String assetPath = "elements/" + mElementProperties.getNumber() + ".webp";
+        if (assetExists(assetPath)) {
+            Picasso.get().load("file:///android_asset/" + assetPath).into(backdrop);
+        } else {
+            backdrop.setImageResource(R.drawable.backdrop);
+        }
+    }
+
+    private boolean assetExists(String path) {
+        try {
+            getAssets().open(path).close();
+            return true;
+        } catch (IOException e) {
+            return false;
+        }
     }
 
     @Override
