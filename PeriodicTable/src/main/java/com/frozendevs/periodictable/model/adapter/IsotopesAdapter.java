@@ -1,17 +1,26 @@
 package com.frozendevs.periodictable.model.adapter;
 
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.res.ColorStateList;
 import android.graphics.Typeface;
+import android.util.TypedValue;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import androidx.appcompat.app.AlertDialog;
+import androidx.core.content.ContextCompat;
+
 import java.util.ArrayList;
 import java.util.List;
 
 import com.frozendevs.periodictable.R;
+import com.frozendevs.periodictable.activity.PropertiesActivity;
+import com.frozendevs.periodictable.model.DecayTarget;
 import com.frozendevs.periodictable.model.Isotope;
 import com.frozendevs.periodictable.view.ExpandableIndicatorView;
 import com.h6ah4i.android.widget.advrecyclerview.expandable.RecyclerViewExpandableItemManager;
@@ -22,10 +31,12 @@ public class IsotopesAdapter extends AbstractExpandableItemAdapter<IsotopesAdapt
         IsotopesAdapter.ChildViewHolder> {
 
     private Typeface mTypeface;
+    private int mLinkColor;
     private IsotopeProperties[] mProperties = new IsotopeProperties[0];
 
     private class Property {
         String mName = "", mValue = "", mValueRaw = "";
+        List<DecayTarget> mTargets;
 
         Property(Context context, String value) {
             if (value != null) {
@@ -68,6 +79,14 @@ public class IsotopesAdapter extends AbstractExpandableItemAdapter<IsotopesAdapt
         String getValueRaw() {
             return mValueRaw;
         }
+
+        void setTargets(List<DecayTarget> targets) {
+            mTargets = targets;
+        }
+
+        List<DecayTarget> getTargets() {
+            return mTargets;
+        }
     }
 
     private class IsotopeProperties {
@@ -86,6 +105,7 @@ public class IsotopesAdapter extends AbstractExpandableItemAdapter<IsotopesAdapt
             Property decayModes = new Property(context,
                     R.string.property_decay_modes, isotope.getHalfLife().equals("-") ?
                     context.getString(R.string.property_value_none) : isotope.getDecayModes());
+            decayModes.setTargets(DecayTarget.parse(isotope.getDecayModes()));
 
             // The original four rows are always shown (half-life, decay modes,
             // spin, abundance). The IAEA-sourced rows below are added only when
@@ -177,12 +197,15 @@ public class IsotopesAdapter extends AbstractExpandableItemAdapter<IsotopesAdapt
     public class ChildViewHolder extends AbstractExpandableItemViewHolder implements
             View.OnClickListener, View.OnCreateContextMenuListener {
         private TextView mName, mValue;
+        private final ColorStateList mDefaultValueColors;
+        private List<DecayTarget> mTargets;
 
         public ChildViewHolder(View view) {
             super(view);
 
             mName = (TextView) view.findViewById(R.id.property_name);
             mValue = (TextView) view.findViewById(R.id.property_value);
+            mDefaultValueColors = mValue.getTextColors();
 
             view.setOnClickListener(this);
             view.setOnCreateContextMenuListener(this);
@@ -196,6 +219,18 @@ public class IsotopesAdapter extends AbstractExpandableItemAdapter<IsotopesAdapt
             mValue.setText(value);
         }
 
+        // Highlight the decay-modes value when it links to a daughter nuclide;
+        // reset to the normal colour for every other (recycled) row.
+        public void setTargets(List<DecayTarget> targets) {
+            mTargets = targets;
+
+            if (targets != null && !targets.isEmpty()) {
+                mValue.setTextColor(mLinkColor);
+            } else {
+                mValue.setTextColor(mDefaultValueColors);
+            }
+        }
+
         public void setTypeface(Typeface typeface) {
             mName.setTypeface(typeface);
             mValue.setTypeface(typeface);
@@ -203,6 +238,38 @@ public class IsotopesAdapter extends AbstractExpandableItemAdapter<IsotopesAdapt
 
         @Override
         public void onClick(View view) {
+            if (mTargets == null || mTargets.isEmpty()) {
+                return;
+            }
+
+            if (mTargets.size() == 1) {
+                navigate(view.getContext(), mTargets.get(0));
+            } else {
+                final Context context = view.getContext();
+                final List<DecayTarget> targets = mTargets;
+
+                CharSequence[] labels = new CharSequence[targets.size()];
+                for (int i = 0; i < targets.size(); i++) {
+                    labels[i] = targets.get(i).label;
+                }
+
+                new AlertDialog.Builder(context)
+                        .setTitle(R.string.decay_choose_path)
+                        .setItems(labels, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                navigate(context, targets.get(which));
+                            }
+                        })
+                        .show();
+            }
+        }
+
+        private void navigate(Context context, DecayTarget target) {
+            Intent intent = new Intent(context, PropertiesActivity.class);
+            intent.putExtra(PropertiesActivity.EXTRA_ATOMIC_NUMBER, target.atomicNumber);
+            intent.putExtra(PropertiesActivity.EXTRA_FOCUS_ISOTOPE, target.isotopeSymbol);
+            context.startActivity(intent);
         }
 
         @Override
@@ -213,6 +280,11 @@ public class IsotopesAdapter extends AbstractExpandableItemAdapter<IsotopesAdapt
 
     public IsotopesAdapter(Context context, Isotope[] isotopes) {
         mTypeface = Typeface.createFromAsset(context.getAssets(), "fonts/NotoSans-Regular.ttf");
+
+        TypedValue accent = new TypedValue();
+        context.getTheme().resolveAttribute(androidx.appcompat.R.attr.colorAccent, accent, true);
+        mLinkColor = accent.resourceId != 0 ?
+                ContextCompat.getColor(context, accent.resourceId) : accent.data;
 
         if (isotopes != null) {
             mProperties = new IsotopeProperties[isotopes.length];
@@ -308,6 +380,17 @@ public class IsotopesAdapter extends AbstractExpandableItemAdapter<IsotopesAdapt
 
         childViewHolder.setName(property.getName());
         childViewHolder.setValue(property.getValue());
+        childViewHolder.setTargets(property.getTargets());
+    }
+
+    /** Group position of the isotope with the given symbol, or -1 if absent. */
+    public int positionOf(String isotopeSymbol) {
+        for (int i = 0; i < mProperties.length; i++) {
+            if (mProperties[i].getSymbol().getValue().equals(isotopeSymbol)) {
+                return i;
+            }
+        }
+        return -1;
     }
 
     @Override

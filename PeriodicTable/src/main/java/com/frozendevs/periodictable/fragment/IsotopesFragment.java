@@ -20,6 +20,8 @@ import com.h6ah4i.android.widget.advrecyclerview.expandable.RecyclerViewExpandab
 import com.h6ah4i.android.widget.advrecyclerview.utils.WrapperAdapterUtils;
 
 public class IsotopesFragment extends Fragment {
+    public static final String ARGUMENT_FOCUS_ISOTOPE = "focusIsotope";
+
     private static final String SAVED_STATE_EXPANDABLE_ITEM_MANAGER =
             "RecyclerViewExpandableItemManager";
 
@@ -55,6 +57,28 @@ public class IsotopesFragment extends Fragment {
         mRecyclerViewExpandableItemManager.attachRecyclerView(recyclerView);
 
         getActivity().registerForContextMenu(recyclerView);
+
+        // When we arrived by following a decay path, expand and scroll to the
+        // daughter nuclide. Only on first creation (not after a rotation).
+        if (savedInstanceState == null && getArguments() != null) {
+            final String focus = getArguments().getString(ARGUMENT_FOCUS_ISOTOPE);
+            final int position = (focus != null) ? adapter.positionOf(focus) : -1;
+
+            if (position >= 0) {
+                mRecyclerViewExpandableItemManager.expandGroup(position);
+
+                recyclerView.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        int flat = mRecyclerViewExpandableItemManager.getFlatPosition(
+                                RecyclerViewExpandableItemManager.getPackedPositionForGroup(
+                                        position));
+                        ((LinearLayoutManager) recyclerView.getLayoutManager())
+                                .scrollToPositionWithOffset(flat, 0);
+                    }
+                });
+            }
+        }
 
         return layout;
     }
