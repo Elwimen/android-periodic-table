@@ -98,6 +98,7 @@
     <string name="property_decay_energy">Decay energy</string>
     <string name="property_magnetic_moment">Magnetic moment</string>
     <string name="property_discovery">Discovered</string>
+    <string name="decay_choose_path">Follow decay path</string>
 
     <!-- Translatable values -->
     <string name="property_value_unknown">Unknown</string>

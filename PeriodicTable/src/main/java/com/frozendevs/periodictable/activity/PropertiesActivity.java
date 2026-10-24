@@ -40,6 +40,10 @@ public class PropertiesActivity extends AppCompatActivity {
 
     public static final String EXTRA_ATOMIC_NUMBER = "com.frozendevs.periodictable.AtomicNumber";
 
+    // Optional: open on the Isotopes tab and scroll to/expand this nuclide
+    // (used when following a decay path from another isotope).
+    public static final String EXTRA_FOCUS_ISOTOPE = "com.frozendevs.periodictable.FocusIsotope";
+
     public static final String ARGUMENT_PROPERTIES = "properties";
 
     private static final String STATE_ELEMENT_PROPERTIES = "elementProperties";
@@ -90,6 +94,14 @@ public class PropertiesActivity extends AppCompatActivity {
         Bundle bundle = new Bundle();
         bundle.putParcelable(ARGUMENT_PROPERTIES, mElementProperties);
 
+        // Follow a decay path here only on first creation, so a rotation doesn't
+        // re-select the tab or re-scroll away from where the user has moved.
+        final String focusIsotope = (savedInstanceState == null) ?
+                getIntent().getStringExtra(EXTRA_FOCUS_ISOTOPE) : null;
+        if (focusIsotope != null) {
+            bundle.putString(IsotopesFragment.ARGUMENT_FOCUS_ISOTOPE, focusIsotope);
+        }
+
         ViewPagerAdapter pagerAdapter = new ViewPagerAdapter(this);
         pagerAdapter.addPage(R.string.fragment_title_properties, PropertiesFragment.class, bundle);
         pagerAdapter.addPage(R.string.fragment_title_isotopes, IsotopesFragment.class, bundle);
@@ -99,6 +111,10 @@ public class PropertiesActivity extends AppCompatActivity {
 
         TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
         tabLayout.setupWithViewPager(viewPager);
+
+        if (focusIsotope != null) {
+            viewPager.setCurrentItem(1, false);
+        }
 
         Typeface typeface = Typeface.createFromAsset(getAssets(), "fonts/NotoSans-Regular.ttf");
 
